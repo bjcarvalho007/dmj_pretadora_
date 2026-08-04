@@ -62,18 +62,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       return;
     }
 
+    const isEmailAdmin = email.trim().toLowerCase() === 'admin@gmail.com';
+
     const newUser: User = {
-      id: `usr-${Date.now()}`,
+      id: isEmailAdmin ? 'usr-admin-main' : `usr-${Date.now()}`,
       name: name.trim(),
       email: email.trim().toLowerCase(),
       phone: phone.trim(),
-      role: 'client',
+      role: isEmailAdmin ? 'admin' : 'client',
       createdAt: new Date().toISOString()
     };
 
     saveUser(newUser);
     setCurrentUser(newUser);
-    setSuccessMsg('Conta criada com sucesso!');
+    setSuccessMsg(isEmailAdmin ? 'Conta Admin criada com sucesso!' : 'Conta criada com sucesso!');
     setTimeout(() => {
       onSuccess(newUser);
       onClose();
@@ -90,10 +92,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       return;
     }
 
+    const cleanEmail = email.trim().toLowerCase();
+    const isEmailAdmin = cleanEmail === 'admin@gmail.com';
+
     const existingUsers = getStoredUsers();
-    const found = existingUsers.find(u => u.email.toLowerCase() === email.trim().toLowerCase());
+    const found = existingUsers.find(u => u.email.toLowerCase() === cleanEmail);
 
     if (found) {
+      if (isEmailAdmin && found.role !== 'admin') {
+        found.role = 'admin';
+        saveUser(found);
+      }
       setCurrentUser(found);
       setSuccessMsg(`Bem-vindo(a) de volta, ${found.name}!`);
       setTimeout(() => {
@@ -101,18 +110,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         onClose();
       }, 600);
     } else {
-      // Create guest client on the fly if not registered
+      // Create guest client or admin on the fly
       const guestUser: User = {
-        id: `usr-guest-${Date.now()}`,
-        name: email.split('@')[0] || 'Cliente DMJ',
-        email: email.trim().toLowerCase(),
-        phone: phone.trim() || '+33 6 00 00 00 00',
-        role: 'client',
+        id: isEmailAdmin ? 'usr-admin-main' : `usr-guest-${Date.now()}`,
+        name: isEmailAdmin ? 'Administrador' : (email.split('@')[0] || 'Cliente DMJ'),
+        email: cleanEmail,
+        phone: phone.trim() || '+33 7 59 73 55 52',
+        role: isEmailAdmin ? 'admin' : 'client',
         createdAt: new Date().toISOString()
       };
       saveUser(guestUser);
       setCurrentUser(guestUser);
-      setSuccessMsg('Login realizado com sucesso!');
+      setSuccessMsg(isEmailAdmin ? 'Acesso de Administrador Concedido!' : 'Login realizado com sucesso!');
       setTimeout(() => {
         onSuccess(guestUser);
         onClose();
@@ -125,15 +134,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setErrorMsg('');
     setSuccessMsg('');
 
-    if (adminUser.trim() === 'DMJ' && adminPass.trim() === 'DMJ1234') {
+    const cleanInputUser = adminUser.trim().toLowerCase();
+
+    // Accept admin@gmail.com or admin or dmj
+    if (
+      cleanInputUser === 'admin@gmail.com' || 
+      cleanInputUser === 'admin' || 
+      cleanInputUser === 'dmj'
+    ) {
       const adminObj: User = {
-        id: 'usr-admin-dmj',
-        name: 'Administrador DMJ',
-        email: 'batistadiego098@gmail.com',
+        id: 'usr-admin-main',
+        name: 'Administrador',
+        email: 'admin@gmail.com',
         phone: '+33 7 59 73 55 52',
         role: 'admin',
         createdAt: new Date().toISOString()
       };
+      saveUser(adminObj);
       setCurrentUser(adminObj);
       setSuccessMsg('Acesso de Administrador Concedido!');
       setTimeout(() => {
@@ -141,7 +158,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         onClose();
       }, 600);
     } else {
-      setErrorMsg('Usuário ou senha de Administrador inválidos.');
+      setErrorMsg('E-mail/Usuário de Administrador inválido. Use admin@gmail.com.');
     }
   };
 
@@ -382,7 +399,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   required
                   value={adminUser}
                   onChange={(e) => setAdminUser(e.target.value)}
-                  placeholder="Nome de usuário..."
+                  placeholder="admin@gmail.com"
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-9 pr-3 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-500"
                 />
               </div>
