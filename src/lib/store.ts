@@ -107,7 +107,7 @@ export function getStoredUsers(): User[] {
 // Helper to save user
 export function saveUser(user: User): void {
   const users = getStoredUsers();
-  const existingIdx = users.findIndex(u => u.email === user.email);
+  const existingIdx = users.findIndex(u => u.email.toLowerCase() === user.email.toLowerCase());
   if (existingIdx >= 0) {
     users[existingIdx] = user;
   } else {
@@ -116,11 +116,10 @@ export function saveUser(user: User): void {
   localStorage.setItem(USERS_KEY, JSON.stringify(users));
 
   // Sync to Firestore asynchronously
-  try {
-    setDoc(doc(db, 'users', user.email.replace(/[^a-zA-Z0-9]/g, '_')), user, { merge: true }).catch(() => {});
-  } catch {
-    // Ignore offline errors
-  }
+  const docId = user.id || user.email.replace(/[^a-zA-Z0-9]/g, '_');
+  setDoc(doc(db, 'users', docId), user, { merge: true })
+    .then(() => console.log('Usuário salvo no Firestore com sucesso:', user.email))
+    .catch((err) => console.error('Erro ao salvar usuário no Firestore:', err));
 }
 
 // Helper for current user
@@ -225,6 +224,17 @@ export function saveServices(services: ServiceItem[]): void {
 // Function to pull remote data from Firestore on app launch
 export async function syncFromFirestore(): Promise<void> {
   try {
+    // Fetch Remote Users
+    const usersSnap = await getDocs(collection(db, 'users'));
+    if (!usersSnap.empty) {
+      const remoteUsers: User[] = [];
+      usersSnap.forEach(d => remoteUsers.push(d.data() as User));
+      if (remoteUsers.length > 0) {
+        localStorage.setItem(USERS_KEY, JSON.stringify(remoteUsers));
+        console.log(`Sincronizados ${remoteUsers.length} usuários do Firestore.`);
+      }
+    }
+
     // Fetch Remote Reviews
     const reviewsSnap = await getDocs(collection(db, 'reviews'));
     if (!reviewsSnap.empty) {
@@ -232,6 +242,7 @@ export async function syncFromFirestore(): Promise<void> {
       reviewsSnap.forEach(d => remoteReviews.push(d.data() as ReviewItem));
       if (remoteReviews.length > 0) {
         localStorage.setItem(REVIEWS_KEY, JSON.stringify(remoteReviews));
+        console.log(`Sincronizadas ${remoteReviews.length} avaliações do Firestore.`);
       }
     }
 
@@ -242,10 +253,11 @@ export async function syncFromFirestore(): Promise<void> {
       servicesSnap.forEach(d => remoteServices.push(d.data() as ServiceItem));
       if (remoteServices.length > 0) {
         localStorage.setItem(SERVICES_KEY, JSON.stringify(remoteServices));
+        console.log(`Sincronizados ${remoteServices.length} serviços do Firestore.`);
       }
     }
   } catch (err) {
-    console.warn('Firestore sync optional warning:', err);
+    console.warn('Firestore sync warning:', err);
   }
 }
 
