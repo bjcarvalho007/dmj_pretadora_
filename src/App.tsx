@@ -188,20 +188,20 @@ export default function App() {
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-900/95 border-b border-slate-800/90 shadow-2xl">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
           
-          <a href="#home" className="flex items-center gap-2 sm:gap-3.5 group shrink-0">
-            <div className="relative w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl p-0.5 bg-gradient-to-tr from-emerald-500 via-amber-400 to-red-600 shadow-lg group-hover:scale-105 transition-all duration-300 flex items-center justify-center">
-              <div className="w-full h-full bg-slate-950 rounded-[10px] sm:rounded-[14px] flex items-center justify-center overflow-hidden p-0.5 sm:p-1">
-                <div className="text-center font-bold leading-none">
-                  <span className="text-emerald-400 text-xs sm:text-base tracking-tighter">DM</span>
-                  <span className="text-red-500 text-xs sm:text-base tracking-tighter">J</span>
-                </div>
-              </div>
+          <a href="#home" className="flex items-center gap-2.5 sm:gap-3.5 group shrink-0">
+            <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl p-0.5 bg-gradient-to-tr from-emerald-500 via-amber-400 to-emerald-600 shadow-lg group-hover:scale-105 transition-all duration-300 flex items-center justify-center">
+              <img 
+                src="/logo.jpg" 
+                alt="DMJ Services Logo" 
+                className="w-full h-full object-cover rounded-[10px] sm:rounded-[14px]"
+                referrerPolicy="no-referrer"
+              />
             </div>
             <div>
-              <span className="font-bold text-base sm:text-xl tracking-wider text-emerald-400 block leading-tight">
+              <span className="font-extrabold text-base sm:text-xl tracking-wider bg-gradient-to-r from-emerald-400 via-amber-300 to-emerald-200 bg-clip-text text-transparent block leading-tight">
                 DMJ
               </span>
-              <span className="text-[9px] sm:text-[10px] font-semibold tracking-widest text-amber-300 uppercase block">
+              <span className="text-[9px] sm:text-[10px] font-bold tracking-widest text-amber-400 uppercase block">
                 {t.providerLabel}
               </span>
             </div>
@@ -1202,12 +1202,15 @@ export default function App() {
             
             <div className="md:col-span-5 space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl p-0.5 bg-gradient-to-tr from-emerald-500 via-amber-400 to-red-600 shadow-md flex items-center justify-center">
-                  <div className="w-full h-full bg-slate-950 rounded-[12px] flex items-center justify-center p-1">
-                    <span className="font-bold text-xs text-emerald-400">DMJ</span>
-                  </div>
+                <div className="w-10 h-10 rounded-2xl p-0.5 bg-gradient-to-tr from-emerald-500 via-amber-400 to-emerald-600 shadow-md flex items-center justify-center">
+                  <img 
+                    src="/logo.jpg" 
+                    alt="DMJ Services Logo" 
+                    className="w-full h-full object-cover rounded-[12px]"
+                    referrerPolicy="no-referrer"
+                  />
                 </div>
-                <span className="font-bold text-lg text-emerald-400 tracking-wider">
+                <span className="font-extrabold text-lg bg-gradient-to-r from-emerald-400 via-amber-300 to-emerald-200 bg-clip-text text-transparent tracking-wider">
                   DMJ {t.providerLabel.toUpperCase()}
                 </span>
               </div>
