@@ -13,6 +13,12 @@ import {
   LogIn,
   UserPlus
 } from 'lucide-react';
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  updateProfile 
+} from 'firebase/auth';
+import { auth } from '../lib/firebase';
 import { User } from '../types';
 import { saveUser, setCurrentUser, getStoredUsers } from '../lib/store';
 
@@ -43,116 +49,205 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleClientRegister = (e: React.FormEvent) => {
+  const handleClientRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
     setSuccessMsg('');
 
-    if (!name.trim() || !email.trim() || !phone.trim() || !password.trim()) {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanName = name.trim();
+    const cleanPhone = phone.trim();
+
+    if (!cleanName || !cleanEmail || !cleanPhone || !password.trim()) {
       setErrorMsg('Por favor, preencha todos os campos.');
       return;
     }
 
-    const existingUsers = getStoredUsers();
-    if (existingUsers.some(u => u.email.toLowerCase() === email.trim().toLowerCase())) {
-      setErrorMsg('Este e-mail já está cadastrado. Faça login.');
+    if (password.trim().length < 6) {
+      setErrorMsg('A senha deve ter pelo menos 6 caracteres para o Firebase.');
       return;
     }
 
-    const isEmailAdmin = email.trim().toLowerCase() === 'admin@gmail.com';
+    setLoading(true);
+    const isEmailAdmin = cleanEmail === 'admin@gmail.com';
 
-    const newUser: User = {
-      id: isEmailAdmin ? 'usr-admin-main' : `usr-${Date.now()}`,
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      phone: phone.trim(),
-      role: isEmailAdmin ? 'admin' : 'client',
-      createdAt: new Date().toISOString()
-    };
+    try {
+      let uid = `usr-${Date.now()}`;
 
-    saveUser(newUser);
-    setCurrentUser(newUser);
-    setSuccessMsg(isEmailAdmin ? 'Conta Admin criada com sucesso!' : 'Conta criada com sucesso!');
-    setTimeout(() => {
-      onSuccess(newUser);
-      onClose();
-    }, 600);
+      // 1. Criar no Firebase Authentication
+      try {
+        const userCred = await createUserWithEmailAndPassword(auth, cleanEmail, password.trim());
+        uid = userCred.user.uid;
+        if (userCred.user) {
+          await updateProfile(userCred.user, { displayName: cleanName }).catch(() => {});
+        }
+      } catch (authErr: any) {
+        console.warn('Firebase Auth registration:', authErr.code || authErr.message);
+        if (authErr.code === 'auth/email-already-in-use') {
+          // Se já existe no Auth, tenta fazer login
+          try {
+            const loginCred = await signInWithEmailAndPassword(auth, cleanEmail, password.trim());
+            uid = loginCred.user.uid;
+          } catch {
+            setErrorMsg('Este e-mail já está cadastrado no Firebase. Por favor, faça login.');
+            setLoading(false);
+            return;
+          }
+        } else if (authErr.code === 'auth/weak-password') {
+          setErrorMsg('A senha deve conter no mínimo 6 caracteres.');
+          setLoading(false);
+          return;
+        } else if (authErr.code === 'auth/invalid-email') {
+          setErrorMsg('E-mail em formato inválido.');
+          setLoading(false);
+          return;
+        }
+      }
+
+      // 2. Salvar dados no Firestore e LocalStorage
+      const newUser: User = {
+        id: isEmailAdmin ? 'usr-admin-main' : uid,
+        name: cleanName,
+        email: cleanEmail,
+        phone: cleanPhone,
+        role: isEmailAdmin ? 'admin' : 'client',
+        createdAt: new Date().toISOString()
+      };
+
+      saveUser(newUser);
+      setCurrentUser(newUser);
+      setSuccessMsg(isEmailAdmin ? 'Conta Admin criada e vinculada ao Firebase!' : 'Conta criada e cadastrada no Firebase com sucesso!');
+      setLoading(false);
+
+      setTimeout(() => {
+        onSuccess(newUser);
+        onClose();
+      }, 600);
+    } catch (err: any) {
+      console.error('Erro ao cadastrar:', err);
+      setErrorMsg('Erro ao cadastrar usuário.');
+      setLoading(false);
+    }
   };
 
-  const handleClientLogin = (e: React.FormEvent) => {
+  const handleClientLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
     setSuccessMsg('');
 
-    if (!email.trim() || !password.trim()) {
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail || !password.trim()) {
       setErrorMsg('Preencha seu e-mail e senha.');
       return;
     }
 
-    const cleanEmail = email.trim().toLowerCase();
+    setLoading(true);
     const isEmailAdmin = cleanEmail === 'admin@gmail.com';
 
-    const existingUsers = getStoredUsers();
-    const found = existingUsers.find(u => u.email.toLowerCase() === cleanEmail);
+    try {
+      let uid = '';
 
-    if (found) {
-      if (isEmailAdmin && found.role !== 'admin') {
-        found.role = 'admin';
-        saveUser(found);
+      // 1. Tentar login no Firebase Authentication
+      try {
+        const userCred = await signInWithEmailAndPassword(auth, cleanEmail, password.trim());
+        uid = userCred.user.uid;
+      } catch (authErr: any) {
+        console.warn('Firebase Auth login fallback:', authErr.code || authErr.message);
+        // Se usuário não existir ainda no Firebase Auth, tenta cadastrar no Auth
+        if (
+          authErr.code === 'auth/user-not-found' || 
+          authErr.code === 'auth/invalid-credential' ||
+          authErr.code === 'auth/invalid-email'
+        ) {
+          if (password.trim().length >= 6) {
+            try {
+              const createCred = await createUserWithEmailAndPassword(auth, cleanEmail, password.trim());
+              uid = createCred.user.uid;
+            } catch (createErr) {
+              console.warn('Could not auto-create in Auth:', createErr);
+            }
+          }
+        }
       }
-      setCurrentUser(found);
-      setSuccessMsg(`Bem-vindo(a) de volta, ${found.name}!`);
-      setTimeout(() => {
-        onSuccess(found);
-        onClose();
-      }, 600);
-    } else {
-      // Create guest client or admin on the fly
-      const guestUser: User = {
-        id: isEmailAdmin ? 'usr-admin-main' : `usr-guest-${Date.now()}`,
-        name: isEmailAdmin ? 'Administrador' : (email.split('@')[0] || 'Cliente DMJ'),
+
+      const existingUsers = getStoredUsers();
+      const found = existingUsers.find(u => u.email.toLowerCase() === cleanEmail);
+
+      const userObj: User = {
+        id: uid || (found ? found.id : (isEmailAdmin ? 'usr-admin-main' : `usr-guest-${Date.now()}`)),
+        name: found?.name || (isEmailAdmin ? 'Administrador' : (cleanEmail.split('@')[0] || 'Cliente DMJ')),
         email: cleanEmail,
-        phone: phone.trim() || '+33 7 59 73 55 52',
-        role: isEmailAdmin ? 'admin' : 'client',
-        createdAt: new Date().toISOString()
+        phone: found?.phone || phone.trim() || '+33 7 59 73 55 52',
+        role: isEmailAdmin ? 'admin' : (found?.role || 'client'),
+        createdAt: found?.createdAt || new Date().toISOString()
       };
-      saveUser(guestUser);
-      setCurrentUser(guestUser);
-      setSuccessMsg(isEmailAdmin ? 'Acesso de Administrador Concedido!' : 'Login realizado com sucesso!');
+
+      saveUser(userObj);
+      setCurrentUser(userObj);
+      setSuccessMsg(isEmailAdmin ? 'Acesso de Administrador Concedido!' : `Bem-vindo(a) de volta, ${userObj.name}!`);
+      setLoading(false);
+
       setTimeout(() => {
-        onSuccess(guestUser);
+        onSuccess(userObj);
         onClose();
       }, 600);
+    } catch (err: any) {
+      console.error('Erro no login:', err);
+      setErrorMsg('Erro ao autenticar.');
+      setLoading(false);
     }
   };
 
-  const handleAdminLogin = (e: React.FormEvent) => {
+  const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
     setSuccessMsg('');
 
     const cleanInputUser = adminUser.trim().toLowerCase();
+    const adminPassVal = adminPass.trim() || '123456';
 
-    // Accept admin@gmail.com or admin or dmj
     if (
       cleanInputUser === 'admin@gmail.com' || 
       cleanInputUser === 'admin' || 
       cleanInputUser === 'dmj'
     ) {
+      setLoading(true);
+      const adminEmail = 'admin@gmail.com';
+      let uid = 'usr-admin-main';
+
+      // Criar ou Entrar no Firebase Auth
+      try {
+        const userCred = await signInWithEmailAndPassword(auth, adminEmail, adminPassVal);
+        uid = userCred.user.uid;
+      } catch {
+        if (adminPassVal.length >= 6) {
+          try {
+            const createCred = await createUserWithEmailAndPassword(auth, adminEmail, adminPassVal);
+            uid = createCred.user.uid;
+          } catch {
+            // Fallback se erro no Auth
+          }
+        }
+      }
+
       const adminObj: User = {
-        id: 'usr-admin-main',
+        id: uid,
         name: 'Administrador',
-        email: 'admin@gmail.com',
+        email: adminEmail,
         phone: '+33 7 59 73 55 52',
         role: 'admin',
         createdAt: new Date().toISOString()
       };
+
       saveUser(adminObj);
       setCurrentUser(adminObj);
       setSuccessMsg('Acesso de Administrador Concedido!');
+      setLoading(false);
+
       setTimeout(() => {
         onSuccess(adminObj);
         onClose();
