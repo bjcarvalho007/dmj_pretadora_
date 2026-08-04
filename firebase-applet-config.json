@@ -1,12 +1,12 @@
 {
   "projectId": "dmj-dc7d9",
-  "appId": "1:108751821049390969424:web:dmj-dc7d9-web-app",
-  "apiKey": "AIzaSyCJBEyT3saaWEdNhABwnLvGvPcgDJy18j0",
+  "appId": "1:364388012911:web:045525579439c9d2580e9a",
+  "apiKey": "AIzaSyCzPArTFf3h_u3D5TLVtIQ16zBNtIb8y4A",
   "authDomain": "dmj-dc7d9.firebaseapp.com",
   "firestoreDatabaseId": "(default)",
   "storageBucket": "dmj-dc7d9.firebasestorage.app",
-  "messagingSenderId": "108751821049390969424",
-  "measurementId": "",
+  "messagingSenderId": "364388012911",
+  "measurementId": "G-7LJ0BQXT38",
   "oAuthClientId": "",
   "recaptchaSiteKey": ""
 }
