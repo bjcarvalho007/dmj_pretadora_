@@ -40,6 +40,7 @@ import cleaningImg from './assets/images/dmj_cleaning_work_1784762983699.jpg';
 
 import { getTranslationsForLang, languagesList } from './i18n';
 import { SmartReviewsCarousel } from './components/SmartReviewsCarousel';
+import { DmjLogo } from './components/DmjLogo';
 import { User, ServiceItem } from './types';
 import { getCurrentUser, setCurrentUser, getStoredServices, syncFromFirestore } from './lib/store';
 import { AuthModal } from './components/AuthModal';
@@ -188,23 +189,8 @@ export default function App() {
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-900/95 border-b border-slate-800/90 shadow-2xl">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
           
-          <a href="#home" className="flex items-center gap-2.5 sm:gap-3.5 group shrink-0">
-            <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl p-0.5 bg-gradient-to-tr from-emerald-500 via-amber-400 to-emerald-600 shadow-lg group-hover:scale-105 transition-all duration-300 flex items-center justify-center">
-              <img 
-                src="/logo.jpg" 
-                alt="DMJ Services Logo" 
-                className="w-full h-full object-cover rounded-[10px] sm:rounded-[14px]"
-                referrerPolicy="no-referrer"
-              />
-            </div>
-            <div>
-              <span className="font-extrabold text-base sm:text-xl tracking-wider bg-gradient-to-r from-emerald-400 via-amber-300 to-emerald-200 bg-clip-text text-transparent block leading-tight">
-                DMJ
-              </span>
-              <span className="text-[9px] sm:text-[10px] font-bold tracking-widest text-amber-400 uppercase block">
-                {t.providerLabel}
-              </span>
-            </div>
+          <a href="#home" className="group shrink-0">
+            <DmjLogo size="md" />
           </a>
 
           {/* Nav Links */}
@@ -376,7 +362,7 @@ export default function App() {
                 <span>{t.guaranteeBadge}</span>
               </div>
 
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.15]">
+              <h1 className="text-[29px] sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.15]">
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-amber-300 to-white">
                   {t.subtitle}
                 </span>
@@ -1201,19 +1187,7 @@ export default function App() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-10 items-start">
             
             <div className="md:col-span-5 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl p-0.5 bg-gradient-to-tr from-emerald-500 via-amber-400 to-emerald-600 shadow-md flex items-center justify-center">
-                  <img 
-                    src="/logo.jpg" 
-                    alt="DMJ Services Logo" 
-                    className="w-full h-full object-cover rounded-[12px]"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-                <span className="font-extrabold text-lg bg-gradient-to-r from-emerald-400 via-amber-300 to-emerald-200 bg-clip-text text-transparent tracking-wider">
-                  DMJ {t.providerLabel.toUpperCase()}
-                </span>
-              </div>
+              <DmjLogo size="lg" />
 
               <p className="text-xs text-slate-300 leading-relaxed max-w-sm font-normal">
                 {t.footerDesc}
