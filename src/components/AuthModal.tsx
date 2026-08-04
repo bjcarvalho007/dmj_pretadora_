@@ -158,7 +158,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         onClose();
       }, 600);
     } else {
-      setErrorMsg('E-mail/Usuário de Administrador inválido. Use admin@gmail.com.');
+      setErrorMsg('Usuário ou senha de Administrador incorretos.');
     }
   };
 
@@ -399,7 +399,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   required
                   value={adminUser}
                   onChange={(e) => setAdminUser(e.target.value)}
-                  placeholder="admin@gmail.com"
+                  placeholder="Nome de usuário ou e-mail..."
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-9 pr-3 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-500"
                 />
               </div>
