@@ -1,0 +1,43 @@
+{
+  "entities": {
+    "reviews": {
+      "title": "Reviews",
+      "description": "User reviews for DMJ Prestataire",
+      "properties": {
+        "id": { "type": "string" },
+        "author": { "type": "string" },
+        "stars": { "type": "number" },
+        "comment": { "type": "string" },
+        "date": { "type": "string" },
+        "location": { "type": "string" },
+        "serviceTag": { "type": "string" },
+        "approved": { "type": "boolean" },
+        "userEmail": { "type": "string" }
+      }
+    },
+    "services": {
+      "title": "Services",
+      "description": "Company services offered",
+      "properties": {
+        "id": { "type": "string" },
+        "titleKey": { "type": "string" },
+        "descKey": { "type": "string" },
+        "iconName": { "type": "string" },
+        "defaultTitle": { "type": "string" },
+        "defaultDesc": { "type": "string" },
+        "active": { "type": "boolean" },
+        "priceEstimate": { "type": "string" }
+      }
+    },
+    "users": {
+      "title": "Users",
+      "description": "Registered accounts",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string" }
+      }
+    }
+  }
+}

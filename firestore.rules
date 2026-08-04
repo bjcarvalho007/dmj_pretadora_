@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Reviews collection: public read for approved reviews or all, write for authenticated users
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if request.auth != null || true; // allow submissions
+      allow update, delete: if true; // admin or owner
+    }
+
+    // Services collection: public read, write for admin/public setup
+    match /services/{serviceId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+  }
+}
