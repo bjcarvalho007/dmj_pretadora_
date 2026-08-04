@@ -6,11 +6,12 @@ import { getFirestore } from "firebase/firestore";
 const DEFAULT_FIREBASE_CONFIG = {
   apiKey: "AIzaSyCzPArTFf3h_u3D5TLVtIQ16zBNtIb8y4A",
   authDomain: "dmj-dc7d9.firebaseapp.com",
+  databaseURL: "https://dmj-dc7d9-default-rtdb.firebaseio.com",
   projectId: "dmj-dc7d9",
   storageBucket: "dmj-dc7d9.firebasestorage.app",
   messagingSenderId: "364388012911",
-  appId: "1:364388012911:web:045525579439c9d2580e9a",
-  measurementId: "G-7LJ0BQXT38",
+  appId: "1:364388012911:web:afd36c42ccc8c1df580e9a",
+  measurementId: "G-MN5F704ZHJ",
   firestoreDatabaseId: "(default)"
 };
 
