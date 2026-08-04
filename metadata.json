@@ -1,6 +1,6 @@
 {
   "name": "DMJ Prestataire de Services",
-  "description": "Services de Jardinage, Peinture, Électricité et Nettoyage de Vitres avec Devis IA Instantané et Contact WhatsApp Direct.",
+  "description": "Services de Jardinage, Peinture, Électricité et Nettoyage de Vitres avec Devis Gratuit et Contact WhatsApp Direct.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
